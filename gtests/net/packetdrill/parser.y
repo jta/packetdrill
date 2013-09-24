@@ -438,6 +438,7 @@ static struct tcp_option *new_tcp_fast_open_option(const char *cookie_string,
 	char *reserved;
 	s64 time_usecs;
 	enum direction_t direction;
+    s8 tos;
 	enum ip_ecn_t ip_ecn;
 	u16 port;
 	s32 window;
@@ -470,15 +471,14 @@ static struct tcp_option *new_tcp_fast_open_option(const char *cookie_string,
 %token <reserved> FD EVENTS REVENTS ONOFF LINGER
 %token <reserved> ACK ECR EOL MSS NOP SACK SACKOK TIMESTAMP VAL WIN WSCALE PRO
 %token <reserved> FAST_OPEN
-%token <reserved> ECT0 ECT1 CE ECT01 NO_ECN
+%token <reserved> ECT0 ECT1 CE ECT01 NO_ECN TOS
 %token <reserved> ICMP UDP MTU
 %token <reserved> OPTION
 %token <floating> FLOAT
 %token <integer> INTEGER HEX_INTEGER
 %token <string> WORD STRING BACK_QUOTED CODE IP_ADDR
 %type <direction> direction
-%type <ip_ecn> opt_ip_info
-%type <ip_ecn> ip_ecn
+%type <integer> opt_ip_info
 %type <option> option options opt_options
 %type <event> event events event_time action
 %type <time_usecs> time opt_end_time
@@ -754,16 +754,8 @@ direction
 ;
 
 opt_ip_info
-:			{ $$ = ECN_NOCHECK; }
-| '[' ip_ecn ']'	{ $$ = $2; }
-;
-
-ip_ecn
-: NO_ECN		{ $$ = ECN_NONE; }
-| ECT0		{ $$ = ECN_ECT0; }
-| ECT1		{ $$ = ECN_ECT1; }
-| ECT01		{ $$ = ECN_ECT01; }
-| CE		{ $$ = ECN_CE; }
+:			{ $$ = -1; }
+| '[' TOS INTEGER ']'	{ $$ = $3; }
 ;
 
 flags

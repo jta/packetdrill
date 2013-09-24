@@ -169,6 +169,7 @@ ect01			return ECT01;
 ect0			return ECT0;
 ect1			return ECT1;
 noecn			return NO_ECN;
+tos         return TOS;
 ce			return CE;
 [.][.][.]		return ELLIPSIS;
 --[a-zA-Z0-9_]+		yylval.string	= option(yytext); return OPTION;

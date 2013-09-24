@@ -84,8 +84,9 @@ struct packet {
 	u32 flags;		/* various meta-flags */
 #define FLAG_WIN_NOCHECK	0x1  /* don't check TCP receive window */
 #define FLAG_OPTIONS_NOCHECK	0x2  /* don't check TCP options */
+#define FLAG_TOS_NOCHECK	0x4  /* don't check TCP options */
 
-	enum ip_ecn_t ecn;	/* IPv4/IPv6 ECN treatment for packet */
+	u8 tos;			/* TOS field */
 
 	__be32 *tcp_ts_val;	/* location of TCP timestamp val, or NULL */
 	__be32 *tcp_ts_ecr;	/* location of TCP timestamp ecr, or NULL */

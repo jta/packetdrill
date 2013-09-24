@@ -646,7 +646,7 @@ static int check_field(
 	return STATUS_OK;
 }
 
-/* Verify that the actual ECN bits are as the script expected. */
+/* Verify that the actual ECN bits are as the script expected.
 static int verify_outbound_live_ecn(enum ip_ecn_t ecn,
 				    u8 actual_ecn_bits,
 				    u8 script_ecn_bits,
@@ -671,6 +671,7 @@ static int verify_outbound_live_ecn(enum ip_ecn_t ecn,
 
 	return STATUS_OK;
 }
+*/
 
 /* How many bytes should we tack onto the script packet to account for
  * the actual TCP options we did see?
@@ -705,13 +706,11 @@ static int verify_outbound_live_ipv4(
 			(ntohs(script_packet->ipv4->tot_len) +
 			 tcp_options_allowance(actual_packet,
 					       script_packet)),
-			ntohs(actual_packet->ipv4->tot_len), error))
-		return STATUS_ERR;
-
-	if (verify_outbound_live_ecn(script_packet->ecn,
-				     ipv4_ecn_bits(actual_packet->ipv4),
-				     ipv4_ecn_bits(script_packet->ipv4),
-				     error))
+			ntohs(actual_packet->ipv4->tot_len), error) ||
+ 	    (script_packet->flags & FLAG_TOS_NOCHECK ? STATUS_OK :
+		check_field("ipv4_tos",
+			    script_packet->ipv4->tos,
+			    actual_packet->ipv4->tos, error)))
 		return STATUS_ERR;
 
 	return STATUS_OK;
@@ -735,13 +734,14 @@ static int verify_outbound_live_ipv6(
 			ntohs(actual_packet->ipv6->payload_len), error) ||
 	    check_field("ipv6_next_header",
 			script_packet->ipv6->next_header,
-			actual_packet->ipv6->next_header, error))
-		return STATUS_ERR;
-
-	if (verify_outbound_live_ecn(script_packet->ecn,
-				     ipv6_ecn_bits(actual_packet->ipv6),
-				     ipv6_ecn_bits(script_packet->ipv6),
-				     error))
+		 	actual_packet->ipv6->next_header, error) ||
+	    (script_packet->flags & FLAG_TOS_NOCHECK ? STATUS_OK :
+		check_field("ipv6_tos_hi",
+			    script_packet->ipv6->traffic_class_hi,
+			    actual_packet->ipv6->traffic_class_hi, error) &&
+		check_field("ipv6_tos_lo",
+			    script_packet->ipv6->traffic_class_lo,
+			    actual_packet->ipv6->traffic_class_lo, error)))
 		return STATUS_ERR;
 
 	return STATUS_OK;

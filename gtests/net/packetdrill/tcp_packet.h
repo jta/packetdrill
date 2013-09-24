@@ -37,7 +37,7 @@
  */
 extern struct packet *new_tcp_packet(int address_family,
 				     enum direction_t direction,
-				     enum ip_ecn_t ecn,
+				     s8 tos,
 				     const char *flags,
 				     u32 start_sequence,
 				     u16 tcp_payload_bytes,

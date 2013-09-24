@@ -27,7 +27,7 @@
 #include "ip.h"
 #include "ipv6.h"
 
-/* Return the ECN header bits for the given ECN treatment. */
+/* Return the ECN header bits for the given ECN treatment. 
 static u8 ip_ecn_bits(enum ip_ecn_t ecn)
 {
 	if (ecn == ECN_ECT0)
@@ -39,16 +39,17 @@ static u8 ip_ecn_bits(enum ip_ecn_t ecn)
 	else
 		return 0;
 }
+*/
 
 /* Fill in IPv4 header fields. */
 static void set_ipv4_header(struct ipv4 *ipv4,
 			    u16 ip_bytes,
 			    enum direction_t direction,
-			    enum ip_ecn_t ecn, u8 protocol)
+			    u8 tos, u8 protocol)
 {
 	ipv4->version = 4;
 	ipv4->ihl = sizeof(struct ipv4) / sizeof(u32);
-	ipv4->tos = ip_ecn_bits(ecn);
+	ipv4->tos = tos;
 
 	ipv4->tot_len = htons(ip_bytes);
 	ipv4->id = 0;
@@ -65,11 +66,11 @@ static void set_ipv4_header(struct ipv4 *ipv4,
 static void set_ipv6_header(struct ipv6 *ipv6,
 			    u16 ip_bytes,
 			    enum direction_t direction,
-			    enum ip_ecn_t ecn, u8 protocol)
+			    u8 tos, u8 protocol)
 {
 	ipv6->version = 6;
-	ipv6->traffic_class_hi = 0;
-	ipv6->traffic_class_lo = ip_ecn_bits(ecn);
+	ipv6->traffic_class_hi = tos >> 4;
+	ipv6->traffic_class_lo = tos & 0x0F;
 	ipv6->flow_label_hi = 0;
 	ipv6->flow_label_lo = 0;
 
@@ -86,12 +87,12 @@ void set_ip_header(void *ip_header,
 		   int address_family,
 		   u16 ip_bytes,
 		   enum direction_t direction,
-		   enum ip_ecn_t ecn, u8 protocol)
+		   u8 tos, u8 protocol)
 {
 	if (address_family == AF_INET)
-		set_ipv4_header(ip_header, ip_bytes, direction, ecn, protocol);
+		set_ipv4_header(ip_header, ip_bytes, direction, tos, protocol);
 	else if (address_family == AF_INET6)
-		set_ipv6_header(ip_header, ip_bytes, direction, ecn, protocol);
+		set_ipv6_header(ip_header, ip_bytes, direction, tos, protocol);
 	else
 		assert(!"bad ip_version in config");
 }
@@ -100,18 +101,18 @@ void set_packet_ip_header(struct packet *packet,
 			  int address_family,
 			  u16 ip_bytes,
 			  enum direction_t direction,
-			  enum ip_ecn_t ecn, u8 protocol)
+			  u8 tos, u8 protocol)
 {
 	if (address_family == AF_INET) {
 		struct ipv4 *ipv4 = (struct ipv4 *) packet->buffer;
 		packet->ipv4 = ipv4;
 		assert(packet->ipv6 == NULL);
-		set_ipv4_header(ipv4, ip_bytes, direction, ecn, protocol);
+		set_ipv4_header(ipv4, ip_bytes, direction, tos, protocol);
 	} else if (address_family == AF_INET6) {
 		struct ipv6 *ipv6 = (struct ipv6 *) packet->buffer;
 		packet->ipv6 = ipv6;
 		assert(packet->ipv4 == NULL);
-		set_ipv6_header(ipv6, ip_bytes, direction, ecn, protocol);
+		set_ipv6_header(ipv6, ip_bytes, direction, tos, protocol);
 	} else {
 		assert(!"bad ip_version in config");
 	}

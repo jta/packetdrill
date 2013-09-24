@@ -34,13 +34,13 @@ extern void set_ip_header(void *ip_header,
 			  int address_family,
 			  u16 ip_bytes,
 			  enum direction_t direction,
-			  enum ip_ecn_t ecn, u8 protocol);
+			  u8 tos, u8 protocol);
 
 /* Set the packet's IP header pointer and then populate the IP header fields. */
 extern void set_packet_ip_header(struct packet *packet,
 				 int address_family,
 				 u16 ip_bytes,
 				 enum direction_t direction,
-				 enum ip_ecn_t ecn, u8 protocol);
+				 u8 tos, u8 protocol);
 
 #endif /* __IP_PACKET_H__ */

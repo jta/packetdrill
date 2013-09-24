@@ -59,12 +59,6 @@ static int tcp_packet_to_string(FILE *s, struct packet *packet,
 {
 	int result = STATUS_OK;       /* return value */
 
-	if ((format == DUMP_FULL) || (format == DUMP_VERBOSE)) {
-		endpoints_to_string(s, packet);
-		fputc(' ', s);
-	}
-
-
 	/* We print flags in the same order as tcpdump 4.1.1. */
 	if (packet->tcp->fin)
 		fputc('F', s);
@@ -113,11 +107,6 @@ static int udp_packet_to_string(FILE *s, struct packet *packet,
 {
 	int result = STATUS_OK;       /* return value */
 
-	if ((format == DUMP_FULL) || (format == DUMP_VERBOSE)) {
-		endpoints_to_string(s, packet);
-		fputc(' ', s);
-	}
-
 	fprintf(s, "udp (%u)", packet_payload_len(packet));
 
 	if (format == DUMP_VERBOSE)
@@ -154,6 +143,23 @@ int packet_to_string(struct packet *packet,
 	if ((packet->ipv4 == NULL) && (packet->ipv6 == NULL)) {
 		fprintf(s, "[NO IP HEADER]");
 	} else {
+
+		if ((format == DUMP_FULL) || (format == DUMP_VERBOSE)) {
+			endpoints_to_string(s, packet);
+			fputc(' ', s);
+		}
+
+		if (!(packet->flags & FLAG_TOS_NOCHECK)) {
+			u8 tos;
+			if (packet->ipv4) {
+				tos = packet->ipv4->tos;
+			} else {
+				tos  = packet->ipv6->traffic_class_hi << 4;
+				tos += packet->ipv6->traffic_class_lo;
+			}
+			fprintf(s, "[tos %u] ", tos);
+		}
+
 		if (packet->tcp != NULL) {
 			if (tcp_packet_to_string(s, packet, format, error))
 				goto out;

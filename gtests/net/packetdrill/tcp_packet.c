@@ -52,7 +52,7 @@ static inline int is_tcp_flag_set(char flag, const char *flags)
 
 struct packet *new_tcp_packet(int address_family,
 			       enum direction_t direction,
-			       enum ip_ecn_t ecn,
+			       s8 tos,
 			       const char *flags,
 			       u32 start_sequence,
 			       u16 tcp_payload_bytes,
@@ -108,10 +108,16 @@ struct packet *new_tcp_packet(int address_family,
 
 	packet->direction = direction;
 	packet->flags = 0;
-	packet->ecn = ecn;
+
+	if (tos < 0) {
+		packet->tos = 0;
+		packet->flags |= FLAG_TOS_NOCHECK;
+	} else {
+		packet->tos = tos;
+	}
 
 	/* Set IP header fields */
-	set_packet_ip_header(packet, address_family, ip_bytes, direction, ecn,
+	set_packet_ip_header(packet, address_family, ip_bytes, direction, tos,
 			     IPPROTO_TCP);
 
 	/* Find the start of TCP sections of the packet */
