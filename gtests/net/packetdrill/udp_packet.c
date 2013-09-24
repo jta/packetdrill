@@ -63,11 +63,11 @@ struct packet *new_udp_packet(int address_family,
 
 	packet->direction = direction;
 	packet->flags = 0;
-	packet->ecn = ECN_NONE;
+	packet->tos = 0;
 
 	/* Set IP header fields */
 	set_packet_ip_header(packet, address_family, ip_bytes, direction,
-			     packet->ecn, IPPROTO_UDP);
+			     packet->tos, IPPROTO_UDP);
 
 	/* Find the start of UDP section of the packet */
 	packet->udp = (struct udp *) (packet_start(packet) + ip_header_bytes);

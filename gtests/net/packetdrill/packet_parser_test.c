@@ -70,7 +70,7 @@ static void test_parse_tcp_ipv4_packet(void)
 
 	assert(packet->time_usecs	== 0);
 	assert(packet->flags		== 0);
-	assert(packet->ecn		== 0);
+	assert(packet->tos		== 0);
 
 	packet_free(packet);
 }
@@ -117,7 +117,7 @@ static void test_parse_tcp_ipv6_packet(void)
 
 	assert(packet->time_usecs	== 0);
 	assert(packet->flags		== 0);
-	assert(packet->ecn		== 0);
+	assert(packet->tos		== 0);
 
 	packet_free(packet);
 }
@@ -157,7 +157,7 @@ static void test_parse_udp_ipv4_packet(void)
 
 	assert(packet->time_usecs	== 0);
 	assert(packet->flags		== 0);
-	assert(packet->ecn		== 0);
+	assert(packet->tos		== 0);
 
 	packet_free(packet);
 }
@@ -201,7 +201,7 @@ static void test_parse_udp_ipv6_packet(void)
 
 	assert(packet->time_usecs	== 0);
 	assert(packet->flags		== 0);
-	assert(packet->ecn		== 0);
+	assert(packet->tos		== 0);
 
 	packet_free(packet);
 }

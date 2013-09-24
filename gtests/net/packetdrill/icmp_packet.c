@@ -317,11 +317,11 @@ struct packet *new_icmp_packet(int address_family,
 
 	packet->direction = direction;
 	packet->flags = 0;
-	packet->ecn = 0;
+	packet->tos = 0;
 
 	/* Set IP header fields */
-	const enum ip_ecn_t ecn = ECN_NONE;
-	set_packet_ip_header(packet, address_family, ip_bytes, direction, ecn,
+	u8 tos = 0;
+	set_packet_ip_header(packet, address_family, ip_bytes, direction, tos,
 			     icmp_protocol(address_family));
 
 	/* Find the start of the ICMP header and then populate common fields. */
@@ -343,7 +343,7 @@ struct packet *new_icmp_packet(int address_family,
 				     layer4_header_len(protocol) +
 				     payload_bytes);
 	set_ip_header(echoed_ip, address_family, echoed_ip_bytes,
-		      reverse_direction(direction), ecn, protocol);
+		      reverse_direction(direction), tos, protocol);
 	if (protocol == IPPROTO_TCP) {
 		u32 *seq = packet_echoed_tcp_seq(packet);
 		*seq = htonl(tcp_start_sequence);
